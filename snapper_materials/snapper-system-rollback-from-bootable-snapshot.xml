@@ -1,0 +1,28 @@
+ <figure xml:id="fig-snapper-list">
+    <title>Listing snapshots in the YaST module</title>
+    <mediaobject>
+      <imageobject role="html">
+      <imagedata fileref="snapper-main-yast.png" width="90%"/>
+      </imageobject>
+      <imageobject role="fo">
+        <imagedata fileref="snapper-main-yast.png" width="70%"/>
+        </imageobject>
+        <textobject role="description">
+          <phrase>YaST screen with the list of system snapshots</phrase>
+        </textobject>
+    </mediaobject>
+  </figure>
+  <figure xml:id="fig-snapper-restore">
+    <title>Listing system items to restore in the YaST module</title>
+    <mediaobject>
+      <imageobject role="html">
+      <imagedata fileref="snapper-yast-restore.png" width="90%"/>
+      </imageobject>
+      <imageobject role="fo">
+        <imagedata fileref="snapper-yast-restore.png" width="70%"/>
+        </imageobject>
+        <textobject role="description">
+          <phrase>YaST screen showing changed system items</phrase>
+        </textobject>
+    </mediaobject>
+  </figure>

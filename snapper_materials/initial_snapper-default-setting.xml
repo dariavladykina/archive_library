@@ -1,0 +1,122 @@
+ <section xml:id="snapper-default-settings">
+    <title>&snapper; default settings</title>
+
+   <para>If the root partition (<filename>/</filename>) has enough space 
+      (16&nbsp;GB or more), taking snapshots for the root partition <filename class="directory">/</filename> is enabled automatically during installation. 
+      ```
+      The following table presents comparison details:</para>
+    
+    <table>
+      <title>Default aspects for disks larger than 16&nbsp;GB and smaller than 16&nbsp;GB</title>
+      <tgroup cols="2">
+          <colspec colnum="1" colname="1" colwidth="3334*"/>
+          <colspec colnum="2" colname="2" colwidth="3334*"/>
+        <thead>
+        <row>
+         <entry>
+          <para>
+            Disk &gt; 16 GB
+          </para>
+         </entry>
+         <entry>
+          <para>
+            Disk &lt; 16 GB
+          </para>
+         </entry>
+         </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry>
+          <para>
+            Configuration <filename>/etc/snapper/configs/root</filename> (0 single) is created automatically.
+          </para>
+         </entry>
+         <entry>
+          <para>
+            No configuration <filename>/etc/snapper/configs/root</filename> (0 single) is created automatically.
+            It must be created manually by &snapper;'s <command>create-config</command> command.
+          </para>
+         </entry>
+         </row>
+        <row>
+         <entry>
+          <para>
+            Snapshot 1 single for root partition (<filename>/</filename>) is taken automatically 
+            with the name <literal>first root filesystem</literal>.
+          </para>
+         </entry>
+         <entry>
+          <para>
+            No snapshot 1 single is automatically taken. The user can create it manually with any name.
+          </para>
+         </entry>
+        </row>
+        <row>
+          <entry>
+           <para>
+            Snapshot 2 single <literal>After installation, important=yes</literal> is taken automatically.
+           </para>
+          </entry>
+          <entry>
+           <para>
+            No snapshot 2 single is automatically created.
+           </para>
+          </entry>
+         </row>
+         <row>
+          <entry>
+           <para>
+            Default <parameter>USE_SNAPPER=yes</parameter> parameter in 
+            <filename>/etc/sysconfig/yast2</filename> configuration.
+            <literal>Administrative Snapshots</literal> creation is <emphasis>ON</emphasis>.
+           </para>
+          </entry>
+          <entry>
+           <para>
+            Default <parameter>USE_SNAPPER=no</parameter> parameter in 
+            <filename>/etc/sysconfig/yast2</filename> configuration.
+            <literal>Administrative Snapshots</literal> creation is <emphasis>OFF</emphasis>.
+           </para>
+          </entry>
+         </row>
+         <row>
+          <entry>
+           <para>
+            Default <parameter>TIMELINE_CREATE=yes</parameter> in <filename>/etc/snapper/configs/root</filename>. 
+            This means that <literal>Timeline Snapshots</literal> creation is <emphasis>ON</emphasis>.
+           </para>
+          </entry>
+          <entry>
+           <para>
+            Default <parameter>TIMELINE_CREATE=no</parameter> in <filename>/etc/snapper/configs/root</filename>. 
+            <literal>Timeline Snapshots</literal> creation is <emphasis>OFF</emphasis>.
+           </para>
+          </entry>
+         </row>
+       </tbody>
+      </tgroup>
+     </table>
+<para>This is the list of snapshots directly after a fresh installation of a system with a root partition &gt; 16 GB:</para>
+<screen>
+# | Type   | Pre # | Date                     | User | Used Space | Cleanup | Description           | Userdata     
+-----+--------+-------+--------------------------+------+------------+---------+-----------------------+--------------
+0  | single |       |                          | root |            |         | current               |              
+1  | single |       | Thu Mar 24 12:14:34 2022 | root |  32.44 MiB |         | first root filesystem |              
+2  | single |       | Thu Mar 24 12:25:55 2022 | root | 280.40 MiB | number  | after installation    | important=yes
+45  | pre    |       | Mon Apr 25 17:58:45 2022 | root |  27.52 MiB | number  | zypp(zypper)          | important=yes
+46  | post   |    45 | Mon Apr 25 18:00:07 2022 | root |  39.04 MiB | number  |                       | important=yes
+    </screen>     
+     <note>
+      <title>Snapshot types and numbers</title>
+      <para>
+        In &snapper;, <quote>0 single</quote> refers to the type and number 
+        of a snapshot. The numbers in front of the snapshot type describe 
+        the order in which the snapshots were created. The word after the 
+        number describes the type of the snapshot. Snapshot <quote>0 single</quote>
+        always refers to the current system. There might already be several other 
+        snapshots depending on the uptime of your system and on whether you 
+        already used &yast; or &zypper;.    
+      </para>
+     </note>
+  </section>

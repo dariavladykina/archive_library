@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic
+[
+  <!ENTITY % entities SYSTEM "../common/generic-entities.ent">
+    %entities;
+  <!ENTITY snapper "Snapper">
+]>
+<!-- refers to legacy doc: <add github link to legacy doc piece, if applicable> -->
+<!-- point back to this document with a similar comment added to your legacy doc piece -->
+<!-- refer to README.md for file and id naming conventions -->
+<!-- metadata is dealt with on the assembly level -->
+<topic xml:id="snapper-default-setup"
+ role="concept" xml:lang="en"
+ xmlns="http://docbook.org/ns/docbook" version="5.2"
+ xmlns:its="http://www.w3.org/2005/11/its"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:trans="http://docbook.org/ns/transclusion">
+ <info>
+  <title>&snapper; default setup</title>    
+    <meta name="maintainer" content="daria.vladykina@suse.com" its:translate="no"/>
+    <abstract>
+       <para>
+        Learn about subvolumes, the default setup of &snapper; and its default settings.
+       </para>
+     </abstract>
+  </info>
+  <para>&snapper; is set up as an undo and recovery tool for system
+    changes. By default, the root partition (<filename>/</filename>) of 
+    &productname; is formatted with <literal>Btrfs</literal>. Taking snapshots
+    is automatically enabled if the root partition (<filename>/</filename>) 
+    is big enough (more than approximately 16&nbsp;GB). 
+    By default, snapshots are disabled on partitions other than <filename>/</filename>.</para>
+    
+    <section xml:id="snapper-subvolumes">
+      <title>What are subvolumes and why are certain subvolumes excluded from snapshots?</title>
+      <para>
+        A Btrfs subvolume is a part of a file system with its own independent file and directory 
+        hierarchy. Unlike LVM logical volumes, which operate at the block level, Btrfs 
+        subvolumes are file extent-based. A snapshot is also considered a subvolume, 
+        carrying the initial content of the original subvolume. Subvolumes appear 
+        as directories and can be manipulated like any other directory, including being 
+        renamed or moved.</para>
+      <para>One purpose of subvolumes is to be explicitly included or excluded from snapshots.
+        Because the primary use case for snapshots is to roll back the system to a previous state,
+        the following rules apply:</para>
+        <itemizedlist>
+           <listitem>
+              <para>
+                No loss of user-created data during a rollback (therefore <filename>/home</filename>
+                is excluded via a subvolume)
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Keep the snapshot size to a minimum (therefore all temporary data in 
+                <filename>/tmp</filename> is excluded via subvolumes)
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Exclude application-specific data (therefore <filename>/srv</filename> that hosts
+                Web or FTP server data is excluded)
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Exclude application runtime data (<filename>/run</filename>, <filename>/var</filename>)
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Exclude third-party applications (<filename>/opt</filename>, <filename>/usr/local</filename>)
+              </para>
+            </listitem>
+          </itemizedlist>
+  <note><title>Why is there a space limit?</title>
+    <para>
+      When creating a snapshot, no physical data copies are created. A snapshot only consists of 
+      pointers to the respective data blocks. As long as the snapshot remains consistent with 
+      the current system, it occupies almost no additional disk space (apart from the metadata 
+      it contains). However, if a file is modified on the system, the changed data is recorded
+      in the snapshot. Over time, as more changes accumulate and the snapshot diverges from 
+      the live system, the snapshot's size increases accordingly.</para>
+      <para>To prevent disks from running full (and the system becoming inoperable as a result), we 
+      recommend having a minimal root file system size. The required size depends on system usage:</para>
+      <itemizedlist>
+      <listitem>
+      <para>The frequency of snapshot creation</para>
+      </listitem>
+      <listitem>
+      <para>The duration for which snapshots are retained</para>
+      </listitem>
+      <listitem>
+      <para>The rate of changes to the system</para>
+      </listitem>
+    </itemizedlist>
+      <para>In general, the more snapshots you have, the longer they are kept, and the more 
+        frequently the system changes, the larger the root partition needs to be.</para>
+    </note>
+</section>
+
+<section xml:id="snapper-default-basics">
+   <title>&snapper; on root</title> 
+    <para>When &snapper; is configured to operate on root, every Btrfs subvolume is
+    excluded by default.</para>
+   <para>The default behavior of &snapper; is defined in a configuration file that 
+    is specific for each partition or Btrfs subvolume. These configuration files reside
+    under <filename>/etc/snapper/configs/</filename>.</para>
+    <tip>
+      <title>Enabling &snapper; in the installed system</title>
+      <para>
+       If you disabled &snapper; during the installation, you can enable it at
+       any time later. To do so, create a default &snapper; configuration for the
+       root file system by running:
+      </para>
+      <screen>&prompt.sudo;snapper -c root create-config /</screen>
+      <para>
+       Afterward, enable the different snapshot types as described in <!--<xref
+       linkend="sec-snapper-setup-customize-auto-snapshots"/>.-->
+      </para>
+      <para>
+       Note that on a Btrfs root file system, snapshots require a file system with
+       subvolumes configured as proposed by the installer and a partition size of at
+       least 16&nbsp;GB.
+      </para>
+     </tip>
+    </section>
+
+  <section xml:id="snapper-default-settings">
+    <title>&snapper; default settings</title>
+      <para>By default, &snapper; on &productname; is automatically configured during 
+      system installation if the following requirements are met:</para>
+ <itemizedlist>
+  <listitem>
+  <para>Root partition size: &gt; 16&nbsp;GB</para>
+  </listitem>
+  <listitem>
+  <para>Root partition file system: Btrfs</para>
+  </listitem>
+ </itemizedlist>
+ <para>Snapshots are created for the root partition only, and the following 
+  directories are excluded by means of subvolumes. For the list of excluded subvolumes, 
+  see <xref linkend="snapper-excluded-directories"/>.</para>
+  <para>With the default configuration, &snapper; creates snapshots on the 
+    following occasions:</para>
+    <itemizedlist>
+      <listitem>
+      <para>Installation: three snapshots are created (0-2, explain at which state)</para>
+      </listitem>
+      <listitem>
+      <para>System administration: whenever making changes to the system using &zypper; or 
+        &yast;. These snapshots are of the type pre/post. One snapshot is created 
+        prior to the system change, a second one after the system change.</para>
+      </listitem>
+      <listitem>
+      <para>Timeline snapshots (explain when they are taken)</para>
+      </listitem>
+    </itemizedlist>
+      <para>To avoid running out of space on the root partition, the following 
+        cleanup procedures are configured by default:</para>
+      <para>explain the default cleanups for the different types of snapshots</para>
+      <para>You can roll back to an existing snapshot at any time by booting from 
+        the respective snapshot and make it active afterwards. For more details refer to ???.</para>
+        <note>
+          <title>Disabling &snapper; automatically and manually</title>
+          <para>If your root partition is smaller than 16&nbsp;GB, the automatic creation 
+          of snapshots as described above is disabled by default. In this case, 
+          you can manually create snapshots (refer to ??? for more instructions). Keep an 
+          eye on the available disk space (see ??? for more information).</para>
+          <para>To disable automatic snapshots even if your root partition is sufficiently 
+          sized, disable snapshots manually during the installation in the partition setup 
+          step as described in ????</para>
+        </note>
+      </section>
+
+  <section xml:id="snapper-snapshot-creation"> 
+    <title>Snapshot creation</title>
+     <para>
+     When a snapshot is created, both the snapshot and the original point to the
+     same blocks in the file system. So, initially a snapshot does not occupy
+     additional disk space. If data in the original file system is modified,
+     changed data blocks are copied while the old data blocks are kept for the
+     snapshot. Therefore, a snapshot occupies the same amount of space as the
+     data modified. So, over time, the amount of space a snapshot allocates
+     constantly grows. As a consequence, deleting files from a
+     <literal>Btrfs</literal> file system containing snapshots may
+     <emphasis>not</emphasis> free disk space!</para>
+     <note>
+       <title>Snapshot location</title>
+       <para>
+        Snapshots always reside on the same partition or subvolume on which the
+        snapshot has been taken. It is not possible to store snapshots on a
+        different partition or subvolume.
+       </para>
+      </note>
+      <para>
+       As a result, partitions containing snapshots need to be larger than
+       partitions not containing snapshots. The exact amount depends strongly on the
+       number of snapshots you keep and the amount of data modifications. As a rule
+       of thumb, give partitions twice as much space as you normally would.
+       To prevent disks from running out of space, old snapshots are automatically
+       cleaned up.<!--Refer to <xref linkend="sec-snapper-setup-customize-archiving"/>
+       Section 10.1.4.4, “Controlling snapshot archiving” for details.-->
+      </para>  
+      <tip>
+        <para>
+          To see what subvolumes are created under <filename>/</filename> and 
+          therefore see which directories (subvolumes) are excluded from the 
+          default snapshots behavior, run:</para>
+        <screen>&prompt.sudo;btrfs subvolume list /</screen>
+      </tip> 
+ </section>
+</topic>
